@@ -2,23 +2,27 @@ version: '3'
 
 services:
   cockroachdb:
+    restart: always
     image: cockroachdb/cockroach:v21.1.10
+    environment:
+      COCKROACH_DB: defaultdb
+      COCKROACH_USER: root 
     ports:
       - "26257:26257"
-    volumes:
+    volumes: 
       - cockroach-data:/cockroach/cockroach-data
     command: start-single-node --insecure
 
   go-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: ./
+    command: ./main
+    environment:
+      DB_HOST: cockroachdb
+      DB_USER: root
+      DB_PORT: 26257
+      DB_NAME: defaultdb
     depends_on:
       - cockroachdb
-    environment:
-      - DB_HOST=cockroachdb
-    ports:
-      - "8080:8080"
 
 volumes:
   cockroach-data:
